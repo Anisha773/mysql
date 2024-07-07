@@ -1,0 +1,231 @@
+import pandas as pd
+import mysql.connector as sql
+
+mydb = sql.connect(host='localhost', user='root', passwd='ankit0807@#', database='railway')
+if mydb.is_connected():
+    print('successfully connected')
+
+def menu():
+    print()
+    print("********************************************")
+    print("    RAILWAY MANAGEMENT SYSTEM     ")
+    print("1. Create table passenger")
+    print("2. Add new passenger details")
+    print("3. Create table train detail")
+    print("4. Add new in Train Details")
+    print("5. Show all from train details")
+    print("6. Show all from Passenger table")
+    print("7. Show PNR(Passenger Name Record)NO.")
+    print("8. Reservation of ticket")
+    print("9. Cancellation of Reservation")
+
+menu()
+
+def create_passengers():
+    c1=mydb.cursor()
+    c1.execute('CREATE TABLE IF NOT EXISTS passengers(pname VARCHAR(30),\
+               age VARCHAR(25),\
+               trainno VARCHAR(30),\
+               noofpas VARCHAR(25),\
+               cls VARCHAR(25),\
+               destination VARCHAR(30),\
+               amt VARCHAR(20),\
+               status VARCHAR(25),\
+               pnrno VARCHAR(30))')
+    c1.close()
+
+def add_passengers():
+    c1 = mydb.cursor()
+    L = []
+    pname = input("ENTER NAME:")
+    L.append(pname)
+    age = input("ENTER AGE:")
+    L.append(age)
+    trainno = input("ENTER TRAIN NUMBER:")
+    L.append(trainno)
+    cls = input("ENTER CLASS:")
+    L.append(cls)
+    destination = input("ENTER DESTINATION:")
+    L.append(destination)
+    amt = input("ENTER FARE:")
+    L.append(amt)
+    status = input("ENTER STATUS:")
+    L.append(status)
+    pnrno = input("ENTER PNR no:")
+    L.append(pnrno)
+    pas = tuple(L)
+    
+    sql = "INSERT INTO passengers(pname, age, trainno, cls, destination, amt, status, pnrno) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    
+    c1.execute(sql, pas)
+    mydb.commit()
+    print("Record Of Passenger Inserted")
+    
+    df = pd.read_sql("SELECT * FROM passengers", mydb)
+    print(df)
+    
+    c1.close()
+
+
+def create_traindetails():
+    c1=mydb.cursor()
+    c1.execute('CREATE TABLE IF NOT EXISTS trainsdetail(tname VARCHAR(30),\
+               tnum VARCHAR(25),\
+               source VARCHAR(30),\
+               destination VARCHAR(30),\
+               fare VARCHAR(25),\
+               ac1 VARCHAR(20),\
+               ac2 VARCHAR(30),\
+               slp VARCHAR(30))')
+    c1.close()
+
+def add_traindetails():
+    c1=mydb.cursor()
+    df=pd.read_sql("SELECT * FROM passengers",mydb)
+    print(df)
+    L=[]
+    tname=input("ENTER TRAIN NAME:")
+    L.append(tname)
+    tnum=input("ENTER NUMBER OF TRAIN:")
+    L.append(tnum)
+    source=input("ENTER SOURCE OF TRAIN:")
+    L.append(source)
+    destination=input("ENTER DESTINATION OF TRAIN:")
+    L.append(destination)
+    fare=input("ENTER FARE OF STATION:")
+    L.append(fare)
+    ac1=input("ENTER NO. SEATS FOR AC1:")
+    L.append(ac1)
+    ac2=input("ENTER NO. SEATS FOR AC2:")
+    L.append(ac2)
+    slp=input("ENTER NO. SEATS FOR SLEEPER:")
+    L.append(slp)
+    f=tuple(L)
+    sql="INSERT INTO trainsdetail(tname,tnum,source,destination,fare,ac1,ac2,slp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+    c1.execute(sql,f)
+    mydb.commit()
+    print("Record Of Train Details Inserted")
+    c1.close()
+
+def showtraindetails():
+    print("ALL TRAINS DETAILS")
+    df=pd.read_sql("SELECT * FROM trainsdetail",mydb)
+    print(df)
+
+def showpassengers():
+    print("ALL PASSENGERS DETAIL")
+    df=pd.read_sql("SELECT * FROM passengers",mydb)
+    print(df)
+
+def disp_pnrno():
+    print("PNR STATUS WINDOW")
+    a=input("Enter Train No. :")
+    qry="SELECT pname, status FROM passengers WHERE trainno = %s"
+    c1=mydb.cursor()
+    c1.execute(qry, (a,))
+    df=pd.DataFrame(c1.fetchall(), columns=['pname', 'status'])
+    print(df)
+    c1.close()
+
+def ticketreservation():
+    print("WE HAVE THE FOLLOWING SEAT TYPES FOR YOU:")
+    print("TNAME is 1 FOR GOA EXPRESS FROM NEW DELHI:")
+    print()
+    print("1. FIRST CLASS AC RS 6000 Per PERSON")
+    print("2. SECOND CLASS AC RS 5000 Per PERSON")
+    print("3. THIRD CLASS AC RS 4000 Per PERSON")
+    print("4. FOR SLEEPER CLASS AC RS 3000 Per PERSON")
+    print()
+    print("TNAME is 2 FOR JAMMJU EXPRESS FROM NEW DELHI:")
+    print()
+    print("1. FIRST CLASS AC RS 10000 Per PERSON")
+    print("2. SECOND CLASS AC RS 9000 Per PERSON")
+    print("3. THIRD CLASS AC RS 8000 Per PERSON")
+    print("4. FOR SLEEPER CLASS AC RS 7000 Per PERSON")
+    
+    tname=int(input("ENTER THE CHOICE OF TRAIN NAME PLEASE-->"))
+    x=int(input("ENTER YOUR CHOICE OF TICKET PLEASE-->"))
+    n=int(input("HOW MANY TICKETS YOU NEED:"))
+
+    if tname == 1:
+        if x == 1:
+            print("YOU HAVE Chosen FIRST CLASS AC TICKET")
+            s = 6000 * n
+        elif x == 2:
+            print("YOU HAVE Chosen SECOND CLASS AC TICKET")
+            s = 5000 * n
+        elif x == 3:
+            print("YOU HAVE Chosen THIRD CLASS AC TICKET")
+            s = 4000 * n
+        elif x == 4:
+            print("YOU HAVE Chosen SLEEPER TICKET")
+            s = 3000 * n
+        else:
+            print("Invalid Option")
+            return
+    elif tname == 2:
+        if x == 1:
+            print("YOU HAVE Chosen FIRST CLASS AC TICKET")
+            s = 10000 * n
+        elif x == 2:
+            print("YOU HAVE Chosen SECOND CLASS AC TICKET")
+            s = 9000 * n
+        elif x == 3:
+            print("YOU HAVE Chosen THIRD CLASS AC TICKET")
+            s = 8000 * n
+        elif x == 4:
+            print("YOU HAVE Chosen SLEEPER TICKET")
+            s = 7000 * n
+        else:
+            print("Invalid Option")
+            return
+    else:
+        print("Invalid Train Choice")
+        return
+
+    print("your TOTAL TICKET PRICE is =", s, "\n")
+
+def cancel():
+    print('Before any change in the STATUS')
+    df=pd.read_sql("SELECT * FROM passengers",mydb)
+    print(df)
+    mc=mydb.cursor()
+    mc.execute("UPDATE passengers SET status='cancelled' WHERE pnrno='G1001'")
+    #mydb.commit()
+    df=pd.read_sql("SELECT * FROM passengers",mydb)
+    print(df)
+    mc.close()
+
+def data():
+    ans='y'
+    while ans == 'y' or ans == 'n':
+        opt = int(input("Enter your choice: "))
+        if opt == 1:
+            create_passengers()
+        elif opt == 2:
+            add_passengers()
+        elif opt == 3:
+            create_traindetails()
+        elif opt == 4:
+            add_traindetails()
+        elif opt == 5:
+            showtraindetails()
+        elif opt == 6:
+            showpassengers()
+        elif opt == 7:
+            disp_pnrno()
+        elif opt == 8:
+            ticketreservation()
+        elif opt == 9:
+            cancel()
+        else:
+            print("INVALID OPTION")
+        ans = input('Do You Want To Continue (Y/N): ').strip().lower()
+
+try:
+    data()
+except KeyboardInterrupt:
+    print("\nExiting the program.")
+finally:
+    mydb.close()
+
